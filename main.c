@@ -24,12 +24,13 @@ char **clash_split_line(char *line);
 int clash_cd(char **args);
 int clash_pwd(char **args);
 int clash_mkdir(char **args);
+int clash_touch(char **args);
 int clash_exit(char **args);
 
-char *builtin_cmd_str[] = {"cd", "pwd", "mkdir", "exit"};
+char *builtin_cmd_str[] = {"cd", "pwd", "mkdir", "touch", "exit"};
 
 int (*builtin_cmd_func[])(char **) = {&clash_cd, &clash_pwd, &clash_mkdir,
-                                      &clash_exit};
+                                      &clash_touch, &clash_exit};
 
 int main() {
     clash_loop();
@@ -211,4 +212,16 @@ int clash_mkdir(char **args) {
 
     return 1;
 }
+
+int clash_touch(char **args) {
+    FILE *fp;
+    fp = fopen(args[1], "w");
+    if (fp == NULL) {
+        perror("clash");
+    }
+    fclose(fp);
+
+    return 1;
+}
+
 int clash_exit(char **args) { return 0; }
