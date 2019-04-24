@@ -1,10 +1,11 @@
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <libgen.h>
 
 #define CLASH_RL_BUFSIZE 1024
 #define CLASH_TOKEN_BUFSIZE 64
@@ -22,11 +23,13 @@ char **clash_split_line(char *line);
 
 int clash_cd(char **args);
 int clash_pwd(char **args);
+int clash_mkdir(char **args);
 int clash_exit(char **args);
 
-char *builtin_cmd_str[] = {"cd", "pwd", "exit"};
+char *builtin_cmd_str[] = {"cd", "pwd", "mkdir", "exit"};
 
-int (*builtin_cmd_func[])(char **) = {&clash_cd, &clash_pwd, &clash_exit};
+int (*builtin_cmd_func[])(char **) = {&clash_cd, &clash_pwd, &clash_mkdir,
+                                      &clash_exit};
 
 int main() {
     clash_loop();
@@ -38,7 +41,7 @@ int get_clash_builtin_cmd_count() {
     return sizeof(builtin_cmd_str) / sizeof(char *);
 }
 
-char *get_dir_name(){
+char *get_dir_name() {
     int bufsize = CLASH_RL_BUFSIZE;
     char *dirpath = malloc(sizeof(char) * bufsize);
     getcwd(dirpath, bufsize);
@@ -161,7 +164,7 @@ void clash_loop(void) {
     int status;
 
     do {
-        printf("%s> ",get_dir_name());
+        printf("%s> ", get_dir_name());
         line = clash_read_line();
         args = clash_split_line(line);
         status = clash_execute(args);
@@ -197,4 +200,15 @@ int clash_pwd(char **args) {
     return 1;
 }
 
+int clash_mkdir(char **args) {
+    if (args[1] == NULL) {
+        fprintf(stderr, "clash: argument error");
+    } else {
+        if (mkdir(args[1], S_ISUID) != 0) {
+            perror("clash");
+        }
+    }
+
+    return 1;
+}
 int clash_exit(char **args) { return 0; }
