@@ -4,12 +4,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <libgen.h>
 
 #define CLASH_RL_BUFSIZE 1024
 #define CLASH_TOKEN_BUFSIZE 64
 #define CLASH_TOKEN_DELIM " \t\r\n\a"
 
 int get_clash_builtin_cmd_count();
+char *get_dir_name();
 
 int clash_launch(char **args);
 int clash_execute(char **args);
@@ -34,6 +36,19 @@ int main() {
 
 int get_clash_builtin_cmd_count() {
     return sizeof(builtin_cmd_str) / sizeof(char *);
+}
+
+char *get_dir_name(){
+    int bufsize = CLASH_RL_BUFSIZE;
+    char *dirpath = malloc(sizeof(char) * bufsize);
+    getcwd(dirpath, bufsize);
+    if (dirpath == NULL) {
+        perror("clash");
+    }
+
+    free(dirpath);
+
+    return basename(dirpath);
 }
 
 int clash_launch(char **args) {
@@ -146,7 +161,7 @@ void clash_loop(void) {
     int status;
 
     do {
-        printf("> ");
+        printf("%s> ",get_dir_name());
         line = clash_read_line();
         args = clash_split_line(line);
         status = clash_execute(args);
