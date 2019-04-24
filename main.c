@@ -21,16 +21,17 @@ void clash_loop(void);
 char *clash_read_line(void);
 char **clash_split_line(char *line);
 
+int clash_echo(char **args);
 int clash_cd(char **args);
 int clash_pwd(char **args);
 int clash_mkdir(char **args);
 int clash_touch(char **args);
 int clash_exit(char **args);
 
-char *builtin_cmd_str[] = {"cd", "pwd", "mkdir", "touch", "exit"};
+char *builtin_cmd_str[] = {"echo", "cd", "pwd", "mkdir", "touch", "exit"};
 
-int (*builtin_cmd_func[])(char **) = {&clash_cd, &clash_pwd, &clash_mkdir,
-                                      &clash_touch, &clash_exit};
+int (*builtin_cmd_func[])(char **) = {&clash_echo,  &clash_cd,    &clash_pwd,
+                                      &clash_mkdir, &clash_touch, &clash_exit};
 
 int main() {
     clash_loop();
@@ -173,6 +174,16 @@ void clash_loop(void) {
         free(line);
         free(args);
     } while (status);
+}
+
+int clash_echo(char **args) {
+    if (args[1] == NULL) {
+        fprintf(stderr, "clash: argument error");
+    } else {
+        fprintf(stdout, "%s\n", args[1]);
+    }
+
+    return 1;
 }
 
 int clash_cd(char **args) {
