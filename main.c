@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #define CLASH_RL_BUFSIZE 1024
@@ -26,12 +28,14 @@ int clash_cd(char **args);
 int clash_pwd(char **args);
 int clash_mkdir(char **args);
 int clash_touch(char **args);
+int clash_ls(char **args);
 int clash_exit(char **args);
 
-char *builtin_cmd_str[] = {"echo", "cd", "pwd", "mkdir", "touch", "exit"};
+char *builtin_cmd_str[] = {"echo", "cd", "pwd", "mkdir", "touch", "ls", "exit"};
 
 int (*builtin_cmd_func[])(char **) = {&clash_echo,  &clash_cd,    &clash_pwd,
-                                      &clash_mkdir, &clash_touch, &clash_exit};
+                                      &clash_mkdir, &clash_touch, &clash_ls,
+                                      &clash_exit};
 
 int main() {
     clash_loop();
@@ -235,4 +239,46 @@ int clash_touch(char **args) {
     return 1;
 }
 
+int clash_ls(char **args) {
+    struct dirent *ent;
+    struct stat stat_buf;
+    DIR *pdir;
+
+    if (args[1] != NULL && strcmp(args[1], "-l") == 0) {
+        if (args[2] == NULL) {
+            pdir = opendir("./");
+        } else {
+            pdir = opendir(args[2]);
+        }
+
+        if (pdir == NULL) {
+            perror("clash");
+        }
+
+        fprintf(stdout, "%-16s\t%s\n","name","update");
+        for (; (ent = readdir(pdir)) != NULL;) {
+            if (stat(ent->d_name, &stat_buf) == 0) {
+                fprintf(stdout, "%-16s\t%s", ent->d_name,
+                        ctime(&stat_buf.st_ctimespec));
+            }
+        }
+        putchar('\n');
+    } else {
+        if (args[1] == NULL) {
+            pdir = opendir("./");
+        } else {
+            pdir = opendir(args[1]);
+        }
+
+        if (pdir == NULL) {
+            perror("clash");
+        }
+        for (; (ent = readdir(pdir)) != NULL;) {
+            fprintf(stdout, "%s\t", ent->d_name);
+        }
+        putchar('\n');
+    }
+    closedir(pdir);
+    return 1;
+}
 int clash_exit(char **args) { return 0; }
