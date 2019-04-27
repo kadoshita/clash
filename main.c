@@ -220,7 +220,7 @@ int clash_mkdir(char **args) {
     if (args[1] == NULL) {
         fprintf(stderr, "clash: argument error");
     } else {
-        if (mkdir(args[1], S_ISUID) != 0) {
+        if (mkdir(args[1], 0755) != 0) {
             perror("clash");
         }
     }
@@ -255,7 +255,7 @@ int clash_ls(char **args) {
             perror("clash");
         }
 
-        fprintf(stdout, "%-16s\t%s\n","name","update");
+        fprintf(stdout, "%-16s\t%s\n", "name", "update");
         for (; (ent = readdir(pdir)) != NULL;) {
             if (stat(ent->d_name, &stat_buf) == 0) {
                 fprintf(stdout, "%-16s\t%s", ent->d_name,
