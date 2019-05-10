@@ -244,6 +244,20 @@ int clash_ls(char **args) {
     struct stat stat_buf;
     DIR *pdir;
 
+    if (args[1] == NULL) {
+        pdir = opendir("./");
+    } else {
+        pdir = opendir(args[1]);
+    }
+
+    if (pdir == NULL) {
+        perror("clash");
+    }
+    for (; (ent = readdir(pdir)) != NULL;) {
+        fprintf(stdout, "%s\t", ent->d_name);
+    }
+    putchar('\n');
+    /*
     if (args[1] != NULL && strcmp(args[1], "-l") == 0) {
         if (args[2] == NULL) {
             pdir = opendir("./");
@@ -278,6 +292,7 @@ int clash_ls(char **args) {
         }
         putchar('\n');
     }
+    */
     closedir(pdir);
     return 1;
 }
