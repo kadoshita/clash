@@ -13,3 +13,8 @@ steps:
 - script: |
     gcc ./main.c -o clash
   displayName: 'make'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
